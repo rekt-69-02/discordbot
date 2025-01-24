@@ -12,10 +12,12 @@ async def on_ready():
     print("I'm ready!!!!")
 
 @bot.command()
-async def reload(ctx, cog):
-    await bot.reload_extension(f'cogs.{cog}')
-    print(f"{cog} reloaded")
-    await ctx.send(f"{cog} reloaded")
+async def reload(ctx):
+    for cogs in os.listdir('./cogs'):
+        if cogs.endswith(".py"):
+            await bot.reload_extension(f'cogs.{cogs[:-3]}')
+    print('reloaded')
+    await ctx.send('reloaded')
 
 with open('token.json', 'r') as jfile:
     a = json.load(jfile)
