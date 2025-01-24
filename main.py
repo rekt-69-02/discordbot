@@ -21,4 +21,4 @@ async def reload(ctx):
 
 with open('token.json', 'r') as jfile:
     a = json.load(jfile)
-    bot.run(a['token1'])
+    bot.run(a['token'])
