@@ -1,4 +1,4 @@
-import discord
+import discord, os
 from PIL import Image, ImageSequence
 from discord.ext import commands
 
@@ -61,6 +61,7 @@ class my_bot_Image(commands.Cog):
             file = discord.File(bgpath, filename=str(u.id)+'.gif')
             e.set_image(url=f'attachment://{u.id}.gif')
             await ctx.channel.send(file=file, embed=e)
+            os.remove(bgpath)
         else:
             bgpath = f"folder/img_temp/{u.id}.png"
             await u.avatar.save(bgpath)
@@ -68,6 +69,7 @@ class my_bot_Image(commands.Cog):
             file = discord.File(bgpath, filename=str(u.id)+'.png')
             e.set_image(url=f'attachment://{u.id}.png')
             await ctx.channel.send(file=file, embed=e)
+            os.remove(bgpath)
     
 
 async def setup(bot):
