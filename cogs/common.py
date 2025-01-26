@@ -1,12 +1,12 @@
 from discord.ext import commands
-import random, discord
+import random, discord, json
 
-class my_bot_Common(commands.Cog):
+class myBotCommon(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.command()
-    async def random(self, ctx, number=None):
+    async def random(self, ctx: commands.Context, number=None):
         try:
             number = int(number)
             if not number:
@@ -17,8 +17,8 @@ class my_bot_Common(commands.Cog):
             await ctx.send(random.randint(0, 100))
 
     @commands.command()
-    async def avatar(self, ctx, user: discord.Member):
+    async def avatar(self, ctx: commands.Context, user: discord.Member):
         await ctx.send(user.avatar.url)
 
 async def setup(bot):
-    await bot.add_cog(my_bot_Common(bot))
+    await bot.add_cog(myBotCommon(bot))

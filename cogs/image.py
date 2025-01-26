@@ -1,14 +1,16 @@
-import discord, os
+from os import remove
+import discord
 from PIL import Image, ImageSequence
 from discord.ext import commands
 
-class my_bot_Image(commands.Cog):
+class MyBoyImage(commands.Cog):
+    '''for image processing functions'''
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.command()
-    async def cum(self, ctx, user):
-
+    async def cum(self, ctx: commands.Context, user: str):
+        """overlay a milk splash png onto given user's avatar"""
         def _resize_png(image: str):
             i = Image.open(image)
             i = i.resize((256, 256), Image.Resampling.LANCZOS)
@@ -22,7 +24,7 @@ class my_bot_Image(commands.Cog):
                     frames.append(frame)
                 frames[0].save(image, save_all=True, append_images=frames[1:])
 
-        def _cum_png(uid):
+        def _cum_png(uid: int):
             overlay = Image.open('folder/img_res/cum.png')
             overlay = overlay.convert("RGBA")
             bg_path = f"folder/img_temp/{uid}.png"
@@ -33,7 +35,7 @@ class my_bot_Image(commands.Cog):
             bg.paste(overlay, (0, 0), mask = overlay)
             bg.save(f'folder/img_temp/{uid}.png')
         
-        def _cum_gif(uid):
+        def _cum_gif(uid: int):
             overlay = Image.open('folder/img_res/cum.png')
             overlay = overlay.convert("RGBA")
             bg_path = f"folder/img_temp/{uid}.gif"
@@ -60,7 +62,7 @@ class my_bot_Image(commands.Cog):
             file = discord.File(bgpath, filename=str(u.id)+'.gif')
             e.set_image(url=f'attachment://{u.id}.gif')
             await ctx.channel.send(file=file, embed=e)
-            os.remove(bgpath)
+            remove(bgpath)
         else:
             bgpath = f"folder/img_temp/{u.id}.png"
             await u.avatar.save(bgpath)
@@ -68,10 +70,10 @@ class my_bot_Image(commands.Cog):
             file = discord.File(bgpath, filename=str(u.id)+'.png')
             e.set_image(url=f'attachment://{u.id}.png')
             await ctx.channel.send(file=file, embed=e)
-            os.remove(bgpath)
+            remove(bgpath)
     
     @commands.command()
-    async def new_cum(self, ctx, user):
+    async def new_cum(self, ctx: commands.Context, user: str):
         
         def _resize(img):
             i = Image.open(img)
@@ -104,8 +106,8 @@ class my_bot_Image(commands.Cog):
         file = discord.File(bg_path[:-4]+'.gif', filename=str(u.id)+'.gif')
         e.set_image(url=f'attachment://{u.id}.gif')
         await ctx.channel.send(file=file, embed=e)
-        os.remove(bg_path)
-        os.remove(bg_path[:-4]+'.gif')
+        remove(bg_path)
+        remove(bg_path[:-4]+'.gif')
         
 async def setup(bot):
-    await bot.add_cog(my_bot_Image(bot))
+    await bot.add_cog(MyBoyImage(bot))

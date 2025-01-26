@@ -12,7 +12,7 @@ async def on_ready():
     print("I'm ready!!!!")
 
 @bot.command()
-async def reload(ctx):
+async def reload(ctx: commands.Context):
     for cogs in os.listdir('./cogs'):
         if cogs.endswith(".py"):
             await bot.reload_extension(f'cogs.{cogs[:-3]}')
