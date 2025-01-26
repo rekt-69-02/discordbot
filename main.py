@@ -1,4 +1,4 @@
-import discord, json, os, asyncio
+import discord, json, os
 from discord.ext import commands
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='!', intents=intents)

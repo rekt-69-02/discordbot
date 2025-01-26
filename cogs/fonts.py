@@ -1,8 +1,6 @@
 from discord.ext import commands
 import json
 
-fonts = ['small caps', 'bold fractur', 'bold circle', 'mono space', 'superscript', 'cursive', 'bold script', 'sans bold italic', 'upside down']
-
 def convert_font(message: tuple[str], font: str):
         with open('fonts.json', 'r') as jfile:
             f = json.load(jfile)[f"{font}"]
