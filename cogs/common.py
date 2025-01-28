@@ -1,5 +1,5 @@
 from discord.ext import commands
-import random, discord, json
+import random, discord, os
 
 class myBotCommon(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -19,6 +19,20 @@ class myBotCommon(commands.Cog):
     @commands.command()
     async def avatar(self, ctx: commands.Context, user: discord.Member):
         await ctx.send(user.avatar.url)
+
+    @commands.command()
+    async def history(self, ctx: commands.Context):
+        await ctx.message.delete()
+        messages = [message async for message in ctx.channel.history(limit=None)]
+        with open(f'./temp/{ctx.channel.id}.txt', 'w', encoding='utf8') as file:
+            for message in messages:
+                if message.attachments:
+                    for a in message.attachments:
+                        file.write(a.url+'\n')
+                else:
+                    file.write(message.content+'\n')
+        await ctx.send(file=discord.File(fp=f'./temp/{ctx.channel.id}.txt', filename=f'./temp/{ctx.channel.id}.txt'))
+        os.remove(f'./temp/{ctx.channel.id}.txt')
 
 async def setup(bot):
     await bot.add_cog(myBotCommon(bot))
