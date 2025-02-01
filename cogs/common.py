@@ -24,15 +24,17 @@ class myBotCommon(commands.Cog):
     async def history(self, ctx: commands.Context):
         await ctx.message.delete()
         messages = [message async for message in ctx.channel.history(limit=None)]
-        with open(f'./temp/{ctx.channel.id}.txt', 'w', encoding='utf8') as file:
+        nm = []
+        with open(f'temp/{ctx.channel.id}.txt', 'w', encoding='utf8') as file:
             for message in messages:
+                nm.append(message.content)
                 if message.attachments:
                     for a in message.attachments:
-                        file.write(a.url+'\n')
-                else:
-                    file.write(message.content+'\n')
-        await ctx.send(file=discord.File(fp=f'./temp/{ctx.channel.id}.txt', filename=f'./temp/{ctx.channel.id}.txt'))
-        os.remove(f'./temp/{ctx.channel.id}.txt')
+                        nm.append(a.url)
+            for new_message in nm:
+                file.write(new_message+'\n')
+        await ctx.send(file=discord.File(fp=f'temp/{ctx.channel.id}.txt', filename=f'{ctx.channel.id}.txt'))
+        os.remove(f'temp/{ctx.channel.id}.txt')
 
 async def setup(bot):
     await bot.add_cog(myBotCommon(bot))
