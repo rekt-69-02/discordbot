@@ -9,7 +9,7 @@ async def on_ready():
         if cogs.endswith(".py"):
             await bot.load_extension(f'cogs.{cogs[:-3]}')
     # await bot.tree.sync()
-    print("I'm ready!!!!")
+    print("I'm ready to cum")
 
 @bot.command()
 async def reload(ctx: commands.Context):
