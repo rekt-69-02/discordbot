@@ -13,7 +13,7 @@ def convert_font(message: tuple[str], font: str):
                 t.append(c)
         return ''.join(t)
 
-class myBotFont(commands.Cog):
+class MyBotFont(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -68,4 +68,4 @@ class myBotFont(commands.Cog):
         await ctx.send(m)
 
 async def setup(bot):
-    await bot.add_cog(myBotFont(bot=bot))
+    await bot.add_cog(MyBotFont(bot=bot))

@@ -1,7 +1,7 @@
 from discord.ext import commands
 import random, discord, os
 
-class myBotCommon(commands.Cog):
+class MyBotCommon(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -37,4 +37,4 @@ class myBotCommon(commands.Cog):
         os.remove(f'temp/{ctx.channel.id}.txt')
 
 async def setup(bot):
-    await bot.add_cog(myBotCommon(bot))
+    await bot.add_cog(MyBotCommon(bot=bot))
