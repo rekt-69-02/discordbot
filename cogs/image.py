@@ -3,7 +3,7 @@ import discord
 from PIL import Image, ImageSequence
 from discord.ext import commands
 
-class MyBoyImage(commands.Cog):
+class MyBotImage(commands.Cog):
     '''for image processing functions'''
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -110,4 +110,4 @@ class MyBoyImage(commands.Cog):
         remove(bg_path[:-4]+'.gif')
         
 async def setup(bot):
-    await bot.add_cog(MyBoyImage(bot))
+    await bot.add_cog(MyBotImage(bot))

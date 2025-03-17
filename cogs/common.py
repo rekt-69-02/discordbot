@@ -1,5 +1,5 @@
 from discord.ext import commands
-import random, discord, os
+import random, discord, os, asyncio
 
 class MyBotCommon(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -19,6 +19,18 @@ class MyBotCommon(commands.Cog):
     @commands.command()
     async def avatar(self, ctx: commands.Context, user: discord.Member):
         await ctx.send(user.avatar.url)
+
+    @commands.command()
+    async def clean(self, ctx: commands.Context, num):
+        await ctx.message.delete()
+        try:
+            num = int(num)
+            history = [message async for message in ctx.channel.history(limit=num)]
+            for message in history:
+                await message.delete()
+        except ValueError:
+            await ctx.send("please assign a number!")
+    
 
     @commands.command()
     async def history(self, ctx: commands.Context):
