@@ -6,7 +6,7 @@ class DynamicVoiceChannel(commands.Cog):
         with open("dvc.json", "r") as jfile:
             settings = json.load(fp=jfile)
         self.settings: dict = settings
-        self.bot = bot
+        self.bot: commands.Bot = bot
         self.user_channels = {}
 
     def _update_settings(self):
@@ -31,7 +31,9 @@ class DynamicVoiceChannel(commands.Cog):
     @commands.group()
     async def dvc(self, ctx: commands.Context):
         if ctx.invoked_subcommand is None:
-            pass # add manual
+            e = discord.Embed(title="Dynamic Voice Channel user manual")
+            e.add_field(name="commands", value="`setup`")
+            await ctx.send(embed=e)
     
     @dvc.command()
     async def setup(self, ctx: commands.Context):
@@ -53,15 +55,16 @@ class DynamicVoiceChannel(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
         if before.channel and after.channel:
-            if before.channel.id in [x["voice"] for x in self.settings.values()]:
+            voice_list = [x["voice"] for x in self.settings.values()]
+            if before.channel.id in voice_list:
                 pass
-            elif str(member.id) in self.user_channels.keys() and after.channel.id in [x["voice"] for x in self.settings.values()]:
+            elif str(member.id) in self.user_channels.keys() and after.channel.id in voice_list:
                 await before.channel.delete()
                 await self._create_and_move(category=after.channel.category, member=member)
-            elif str(member.id) in self.user_channels.keys() and after.channel.id not in [x["voice"] for x in self.settings.values()]:
+            elif str(member.id) in self.user_channels.keys() and after.channel.id not in voice_list:
                 await before.channel.delete()
                 self.user_channels.pop(str(member.id))
-            elif self._get_dvc_category(before.channel) is None and after.channel.id in [x["voice"] for x in self.settings.values()]:
+            elif self._get_dvc_category(before.channel) is None and after.channel.id in voice_list:
                 category = self._get_dvc_category(after.channel)
                 if category:
                     await self._create_and_move(category=category, member=member)
