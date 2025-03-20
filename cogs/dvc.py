@@ -23,6 +23,23 @@ class DynamicVoiceChannel(commands.Cog):
                 return category
         return None
 
+    async def _set_permission(self, channel: discord.VoiceChannel, members:list[discord.Member]):
+        overwrite_user = discord.PermissionOverwrite()
+        overwrite_user.connect = True
+        overwrite_user.view_channel = True
+        overwrite_others = discord.PermissionOverwrite()
+        overwrite_others.connect = False
+        overwrite_others.view_channel = False
+        if len(members) == 0:
+            await channel.set_permissions(target=members[0], overwrite=overwrite_user)
+            await channel.set_permissions(target=channel.guild.default_role, overwrite=overwrite_others)
+        else:
+            await channel.set_permissions(target=members[0], overwrite=overwrite_user)
+            members.pop(0)
+            for member in members:
+                await channel.set_permissions(target=member, overwrite=overwrite_user)
+            await channel.set_permissions(target=channel.guild.default_role, overwrite=overwrite_others)
+
     async def _create_and_move(self, category: discord.CategoryChannel, member: discord.Member):
         user_channel = await category.create_voice_channel(name=f"{member.name}的語音頻道")
         await member.move_to(user_channel)
@@ -51,7 +68,44 @@ class DynamicVoiceChannel(commands.Cog):
                 }
             json.dump(j, jfile2)
         self._update_settings()
-            
+        
+    @dvc.command()
+    async def limit(self, ctx: commands.Context, num=None):
+        if ctx.channel.id not in [x["text"] for x in self.settings.values()] or str(ctx.author.id) not in self.user_channels.keys():
+            return
+        c: discord.VoiceChannel = self.bot.get_channel(self.user_channels[str(ctx.author.id)])
+        print(c)
+        if num is None:
+            await c.edit(user_limit=1)
+        else:
+            try:
+                await c.edit(user_limit=int(num))
+            except ValueError:
+                await ctx.send("請輸入有效數值")
+
+    @dvc.command()
+    async def perm(self, ctx: commands.Context, *members):
+        if ctx.channel.id not in [x["text"] for x in self.settings.values()] or str(ctx.author.id) not in self.user_channels.keys():
+            return
+        c: discord.VoiceChannel = self.bot.get_channel(self.user_channels[str(ctx.author.id)])
+        member_list = [ctx.author]
+        if members == ():
+            await self._set_permission(channel=c, members=member_list)
+        else:
+            for member in members:
+                member_list.append(discord.utils.get(ctx.guild.members, name=member))
+            await self._set_permission(channel=c, members=member_list)
+
+    @dvc.command()
+    async def name(self, ctx: commands.Context, name:str=None):
+        if ctx.channel.id not in [x["text"] for x in self.settings.values()] or str(ctx.author.id) not in self.user_channels.keys():
+            return
+        c: discord.VoiceChannel = self.bot.get_channel(self.user_channels[str(ctx.author.id)])
+        if name == ():
+            await c.edit(name=f"{ctx.author.name}的語音頻道")
+        else:
+            await c.edit(name=name)
+
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
         if before.channel and after.channel:

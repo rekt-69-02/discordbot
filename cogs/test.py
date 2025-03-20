@@ -31,6 +31,11 @@ class MyBotTest(commands.Cog):
                     await ch.delete()
                 await c.delete()
 
+    @commands.command()
+    async def get_user(self, ctx: commands.Context, member=None):
+        user = discord.utils.get(ctx.guild.members, name=member)
+        print(user)
+        
 async def setup(bot):
     await bot.add_cog(MyBotTest(bot=bot))
         
