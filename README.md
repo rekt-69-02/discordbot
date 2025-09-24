@@ -1,4 +1,3 @@
-# discordbot
 # usage<br />
 &nbsp;&nbsp;&nbsp;&nbsp; 1. create a file named 'token.json' <br />
 &nbsp;&nbsp;&nbsp;&nbsp; 2. paste this into the file: {"token": "[YOUR BOT'S TOKEN]"}<br />
