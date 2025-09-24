@@ -60,7 +60,7 @@ class DynamicVoiceChannel(commands.Cog):
         dvc_voice = await dvc_category.create_voice_channel(name="點我創建語音頻道")
         with open("dvc.json", "r", encoding="utf8") as jfile:
             j = json.load(fp=jfile)
-        with open("dvc.json", "w", encoding="utf8") as jfile2:
+        with open("dvc.json", "w+", encoding="utf8") as jfile2:
             j[f"{ctx.guild.id}"] = {
                 "category": dvc_category.id,
                 "text": dvc_text.id,

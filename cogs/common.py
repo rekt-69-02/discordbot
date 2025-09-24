@@ -6,7 +6,7 @@ class MyBotCommon(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def random(self, ctx: commands.Context, number=None):
+    async def random(self, ctx: commands.Context, number: int=None):
         try:
             number = int(number)
             if not number:
@@ -18,19 +18,38 @@ class MyBotCommon(commands.Cog):
 
     @commands.command()
     async def avatar(self, ctx: commands.Context, user: discord.Member):
-        await ctx.send(user.avatar.url)
+        e = discord.Embed(title=f"{user}'s avatar")
+        e.set_image(url=user.avatar.url)
+        await ctx.send(embed=e)
 
     @commands.command()
-    async def clean(self, ctx: commands.Context, num):
+    async def clean(self, ctx: commands.Context, num: int):
         await ctx.message.delete()
         try:
-            num = int(num)
             history = [message async for message in ctx.channel.history(limit=num)]
             for message in history:
                 await message.delete()
         except ValueError:
             await ctx.send("please assign a number!")
     
+    @commands.command()
+    async def move(self, ctx: commands.Context, num: int, skip: int, channel:discord.TextChannel=None):
+        await ctx.message.delete()
+        try:
+            if not channel:
+                channel = await ctx.send("please assign a channel!")
+            history = [message async for message in ctx.channel.history(limit=num+skip)]
+            history = history[skip:]
+            for message in reversed(history):
+                if message.attachments:
+                    for a in message.attachments:
+                        await channel.send(a.url)
+                await channel.send(message.content)
+                await asyncio.sleep(2)
+            for message in history:
+                await message.delete()
+        except ValueError:
+            await ctx.send("please assign a number!")
 
     @commands.command()
     async def history(self, ctx: commands.Context):
