@@ -2,14 +2,22 @@ from os import remove
 import discord
 from PIL import Image, ImageSequence
 from discord.ext import commands
+from discord import app_commands
 
 class MyBotImage(commands.Cog):
     '''for image processing functions'''
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command()
-    async def cum(self, ctx: commands.Context, user: str):
+    @app_commands.Group()
+    async def image(self, ctx: commands.Context):
+        if ctx.invoked_subcommand is None:
+            pass
+
+    IImage = app_commands.Group(name="Image", description="xd")
+
+    @IImage.command(name="cum", description="cum on someone's face")
+    async def cum(self, interaction: discord.Interaction, user: str):
         """overlay a milk splash png onto given user's avatar"""
         def _resize_png(image: str):
             i = Image.open(image)
@@ -50,10 +58,10 @@ class MyBotImage(commands.Cog):
                 frames.append(frame)
             frames[0].save(bg_path, save_all=True, append_images=frames[1:])
 
-        u: discord.User = discord.utils.find(lambda m: m.name == user, ctx.guild.members)
+        u: discord.User = discord.utils.find(lambda m: m.name == user, interaction.guild.members)
         e = discord.Embed(title='someone has cumemd!!111!!1!111!11!!1', color=discord.Color.pink())
         if u is None:
-            u = ctx.author
+            u = interaction.user
             e = discord.Embed(title=f'uoooohh oh fuck **{u.name}** has cummed on himself looooll', color=discord.Color.pink())
         if u.avatar.is_animated():
             bgpath = f"folder/img_temp/{u.id}.gif"
@@ -61,7 +69,7 @@ class MyBotImage(commands.Cog):
             _cum_gif(u.id)
             file = discord.File(bgpath, filename=str(u.id)+'.gif')
             e.set_image(url=f'attachment://{u.id}.gif')
-            await ctx.channel.send(file=file, embed=e)
+            await interaction.response.send_message(file=file, embed=e)
             remove(bgpath)
         else:
             bgpath = f"folder/img_temp/{u.id}.png"
@@ -69,11 +77,11 @@ class MyBotImage(commands.Cog):
             _cum_png(u.id)
             file = discord.File(bgpath, filename=str(u.id)+'.png')
             e.set_image(url=f'attachment://{u.id}.png')
-            await ctx.channel.send(file=file, embed=e)
+            await interaction.response.send_message(file=file, embed=e)
             remove(bgpath)
     
-    @commands.command()
-    async def new_cum(self, ctx: commands.Context, user: str):
+    @IImage.command()
+    async def new_cum(self, interaction: discord.Interaction, user: str):
         
         def _resize(img):
             i = Image.open(img)
@@ -93,11 +101,11 @@ class MyBotImage(commands.Cog):
             frames[0].save(img[:-4]+'.gif', save_all=True, append_images=frames[1:], loop=0)
 
 
-        e = discord.Embed(title='someone has cummed!!!!!!', description=f'fresh semen produced by {ctx.author.mention}', color=discord.Color.pink())
-        u: discord.User = discord.utils.get(ctx.guild.members, name=user)
+        e = discord.Embed(title='someone has cummed!!!!!!', description=f'fresh semen produced by {interaction.user}', color=discord.Color.pink())
+        u: discord.User = discord.utils.get(interaction.guild.members, name=user)
         if u is None:
-            u = ctx.author
-            e = discord.Embed(title='uoooohh ooh fuuuukkk', description=f'{ctx.author.mention} just cummed on himself !!!11!111!1!1', color=discord.Color.pink())
+            u = interaction.user
+            e = discord.Embed(title='uoooohh ooh fuuuukkk', description=f'{interaction.user.mention} just cummed on himself !!!11!111!1!1', color=discord.Color.pink())
         await u.avatar.save(f'folder/img_temp/{u.id}.png')
         bg_path = f'folder/img_temp/{u.id}.png'
         _resize(bg_path)
@@ -105,7 +113,7 @@ class MyBotImage(commands.Cog):
         
         file = discord.File(bg_path[:-4]+'.gif', filename=str(u.id)+'.gif')
         e.set_image(url=f'attachment://{u.id}.gif')
-        await ctx.channel.send(file=file, embed=e)
+        await interaction.response.send_message(file=file, embed=e)
         remove(bg_path)
         remove(bg_path[:-4]+'.gif')
         

@@ -1,3 +1,4 @@
+from discord import app_commands
 from discord.ext import commands
 import json
 
@@ -17,53 +18,50 @@ class MyBotFont(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.group()
-    async def fonts(self, ctx: commands.Context):
-        if ctx.invoked_subcommand is None:
-            pass
+    fonts = app_commands.Group(name = "fonts", description='convert your texts to some cool fonts')
     
     @fonts.command()
-    async def smallcaps(self, ctx:commands.Context ,*message: str):
+    async def smallcaps(self, ctx:commands.Context ,message: str):
         m = convert_font(message=message, font='small caps')
         await ctx.send(m)
     
     @fonts.command()
-    async def boldfractur(self, ctx:commands.Context ,*message: str):
+    async def boldfractur(self, ctx:commands.Context ,message: str):
         m = convert_font(message=message, font='bold fractur')
         await ctx.send(m)
     
     @fonts.command()
-    async def boldcircle(self, ctx:commands.Context ,*message: str):
+    async def boldcircle(self, ctx:commands.Context ,message: str):
         m = convert_font(message=message, font='bold circle')
         await ctx.send(m)
     
     @fonts.command()
-    async def monospace(self, ctx:commands.Context ,*message: str):
+    async def monospace(self, ctx:commands.Context ,message: str):
         m = convert_font(message=message, font='mono space')
         await ctx.send(m)
 
     @fonts.command()
-    async def superscript(self, ctx:commands.Context ,*message: str):
+    async def superscript(self, ctx:commands.Context ,message: str):
         m = convert_font(message=message, font='superscript')
         await ctx.send(m)
 
     @fonts.command()
-    async def cursive(self, ctx:commands.Context ,*message: str):
+    async def cursive(self, ctx:commands.Context ,message: str):
         m = convert_font(message=message.content, font='cursive')
         await ctx.send(m)
 
     @fonts.command()
-    async def boldscript(self, ctx:commands.Context ,*message: str):
+    async def boldscript(self, ctx:commands.Context ,message: str):
         m = convert_font(message=message, font='bold script')
         await ctx.send(m)
 
     @fonts.command()
-    async def SBI(self, ctx:commands.Context ,*message: str):
+    async def SBI(self, ctx:commands.Context ,message: str):
         m = convert_font(message=message, font='sans bold italic')
         await ctx.send(m)
 
     @fonts.command()
-    async def upsidedown(self, ctx:commands.Context ,*message: str):
+    async def upsidedown(self, ctx:commands.Context ,message: str):
         m = convert_font(message=message, font='upside down')
         await ctx.send(m)
 

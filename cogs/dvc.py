@@ -1,4 +1,5 @@
 import discord, json
+from discord import app_commands
 from discord.ext import commands
 
 class DynamicVoiceChannel(commands.Cog):
@@ -8,7 +9,7 @@ class DynamicVoiceChannel(commands.Cog):
         self.settings: dict = settings
         self.bot: commands.Bot = bot
         self.user_channels = {}
-
+    
     def _update_settings(self):
         with open("dvc.json", "r", encoding="utf8") as jfile:
             settings = json.load(fp=jfile)
@@ -45,70 +46,66 @@ class DynamicVoiceChannel(commands.Cog):
         await member.move_to(user_channel)
         self.user_channels[f"{member.id}"] = user_channel.id
 
-    @commands.group(description="dvc")
-    async def dvc(self, ctx: commands.Context):
-        if ctx.invoked_subcommand is None:
-            e = discord.Embed(title="Dynamic Voice Channel user manual")
-            e.add_field(name="commands", value="`setup`")
-            await ctx.send(embed=e)
+    DVC = app_commands.Group(name = "dvc", description='Dynamic Voice Channel')
     
-    @dvc.command()
-    async def setup(self, ctx: commands.Context):
-        guild = ctx.guild
+    @DVC.command(name="setup", description="Setup a DVC system")
+    async def setup(self, interaction: discord.Interaction):
+        guild = interaction.guild
         dvc_category = await guild.create_category(name="動態語音頻道")
         dvc_text = await dvc_category.create_text_channel(name="指令")
         dvc_voice = await dvc_category.create_voice_channel(name="點我創建語音頻道")
         with open("dvc.json", "r", encoding="utf8") as jfile:
             j = json.load(fp=jfile)
         with open("dvc.json", "w+", encoding="utf8") as jfile2:
-            j[f"{ctx.guild.id}"] = {
+            j[f"{interaction.guild.id}"] = {
                 "category": dvc_category.id,
                 "text": dvc_text.id,
                 "voice": dvc_voice.id
                 }
             json.dump(j, jfile2)
         self._update_settings()
-        
-    @dvc.command()
-    async def limit(self, ctx: commands.Context, num=None):
-        if ctx.channel.id not in [x["text"] for x in self.settings.values()] or str(ctx.author.id) not in self.user_channels.keys():
+        await interaction.response.send_message("Setup complete!", ephemeral=True)
+
+    @DVC.command()
+    async def limit(self, interaction: discord.Interaction, num: int=None):
+        if interaction.channel.id not in [x["text"] for x in self.settings.values()] or str(interaction.user.id) not in self.user_channels.keys():
             return
-        c: discord.VoiceChannel = self.bot.get_channel(self.user_channels[str(ctx.author.id)])
+        c: discord.VoiceChannel = self.bot.get_channel(self.user_channels[str(interaction.user.id)])
         print(c)
         if num is None:
             await c.edit(user_limit=1)
+            await interaction.response.send_message(f"{c.name}的人數上限設為 1", ephemeral=True)
         else:
             try:
                 await c.edit(user_limit=int(num))
+                await interaction.response.send_message(f"{c.name}的人數上限設為 {num}", ephemeral=True)
             except ValueError:
-                await ctx.send("請輸入有效數值")
-    
-    @dvc.command()
-    async def make_perma(self, ctx):
-        pass
+                await interaction.response.send_message("請輸入有效數值", ephemeral=True)
 
-    @dvc.command()
-    async def perm(self, ctx: commands.Context, *members):
-        if ctx.channel.id not in [x["text"] for x in self.settings.values()] or str(ctx.author.id) not in self.user_channels.keys():
+    @DVC.command()
+    async def perm(self, interaction: discord.Interaction, member: discord.Member):
+        if interaction.channel.id not in [x["text"] for x in self.settings.values()] or str(interaction.user.id) not in self.user_channels.keys():
             return
-        c: discord.VoiceChannel = self.bot.get_channel(self.user_channels[str(ctx.author.id)])
-        member_list = [ctx.author]
-        if members == ():
+        c: discord.VoiceChannel = self.bot.get_channel(self.user_channels[str(interaction.user.id)])
+        member_list = member.voice.channel.members
+        if not member:
             await self._set_permission(channel=c, members=member_list)
+            await interaction.response.send_message(f"頻道權限設為{' '.join([m.name for m in member_list])}", ephemeral=True)
         else:
-            for member in members:
-                member_list.append(discord.utils.get(ctx.guild.members, name=member))
-            await self._set_permission(channel=c, members=member_list)
+            await self._set_permission(channel=c, member=member_list)
+            await interaction.response.send_message(f"頻道權限設為{' '.join([m.name for m in member_list])}", ephemeral=True)
 
-    @dvc.command()
-    async def name(self, ctx: commands.Context, name:str=None):
-        if ctx.channel.id not in [x["text"] for x in self.settings.values()] or str(ctx.author.id) not in self.user_channels.keys():
+    @DVC.command()
+    async def name(self, interaction: discord.Interaction, name:str=None):
+        if interaction.channel.id not in [x["text"] for x in self.settings.values()] or str(interaction.user.id) not in self.user_channels.keys():
             return
-        c: discord.VoiceChannel = self.bot.get_channel(self.user_channels[str(ctx.author.id)])
+        c: discord.VoiceChannel = self.bot.get_channel(self.user_channels[str(interaction.user.id)])
         if name == ():
-            await c.edit(name=f"{ctx.author.name}的語音頻道")
+            await c.edit(name=f"{interaction.user.name}的語音頻道")
+            await interaction.response.send_message(f"頻道名稱更改為 {interaction.user.name}的語音頻道", ephemeral=True)
         else:
             await c.edit(name=name)
+            await interaction.response.send_message(f"頻道名稱更改為 {name}", ephemeral=True)
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
@@ -141,6 +138,15 @@ class DynamicVoiceChannel(commands.Cog):
             if str(member.id) in self.user_channels.keys():
                 self.user_channels.pop(str(member.id))
                 await before.channel.delete()
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        for guild in self.settings.keys():
+            voice = self.bot.get_channel(guild["voice"])
+            category = voice.category
+            for channel in category.channels:
+                if channel != voice:
+                    await channel.delete()
 
 async def setup(bot):
     await bot.add_cog(DynamicVoiceChannel(bot=bot))
